@@ -74,9 +74,10 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 			if fails < len(f.proxies) {
 				continue
 			}
-			// All upstream proxies are dead, assume healtcheck is complete broken and randomly
+			// All upstream proxies are dead, assume healtcheck is completely broken and randomly
 			// select an upstream to connect to.
-			proxy = f.list()[0]
+			r := new(random)
+			proxy = r.List(f.proxies)[0]
 			log.Printf("[WARNING] All upstreams down, picking random one to connect to %s", proxy.host.addr)
 		}
 
@@ -130,7 +131,7 @@ func (f *Forward) isAllowedDomain(name string) bool {
 	return true
 }
 
-// list returns a set of proxies to be used for this client depending on the policy in f.
+// List returns a set of proxies to be used for this client depending on the policy in f.
 func (f *Forward) list() []*Proxy { return f.p.List(f.proxies) }
 
 var (

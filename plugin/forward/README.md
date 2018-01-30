@@ -59,9 +59,10 @@ forward FROM TO... {
   needs this to be set to `dns.quad9.net`.
 * `policy` specifies the policy to use for selecting upstream servers. The default is `random`.
 
-The upstream selection is done via random selection. If the socket for this client isn't known *forward*
-will randomly choose one. If this turns out to be unhealthy, the next one is tried. If *all* hosts
-are down, we assume healthchecking is broken and select (according to policy) an upstream to try.
+The upstream selection is done via random (default policy) selection. If the socket for this client
+isn't known *forward* will randomly choose one. If this turns out to be unhealthy, the next one is
+tried. If *all* hosts are down, we assume healthchecking is broken and select a *random* upstream to
+try.
 
 Also note the TLS config is "global" for the whole forwarding proxy if you need a different
 `tls-name` for different upstreams you're out of luck.
