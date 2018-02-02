@@ -131,6 +131,9 @@ func parseForward(c *caddy.Controller) (*Forward, error) {
 					break
 				}
 
+				// This is more of a bug in // dnsutil.ParseHostPortOrFile that defaults to
+				// 53 because it doesn't know about the tls:// // and friends (that should be fixed). Hence
+				// Fix the port number here, back to what the user intended.
 				if p == "53" {
 					h = net.JoinHostPort(h1, "853")
 				}
@@ -181,6 +184,9 @@ func parseBlock(c *caddy.Controller, f *Forward) error {
 		if err != nil {
 			return err
 		}
+		if n < 0 {
+			return fmt.Errorf("max_fails can't be negative: %s", n)
+		}
 		f.maxfails = uint32(n)
 	case "health_check":
 		if !c.NextArg() {
@@ -189,6 +195,9 @@ func parseBlock(c *caddy.Controller, f *Forward) error {
 		dur, err := time.ParseDuration(c.Val())
 		if err != nil {
 			return err
+		}
+		if dur < 0 {
+			return fmt.Errorf("health_check can't be negative: %s", dur)
 		}
 		f.hcInterval = dur
 		for i := range f.proxies {
@@ -225,6 +234,9 @@ func parseBlock(c *caddy.Controller, f *Forward) error {
 		dur, err := time.ParseDuration(c.Val())
 		if err != nil {
 			return err
+		}
+		if dur < 0 {
+			return fmt.Errorf("expire can't be negative: %s", dur)
 		}
 		f.expire = dur
 	case "policy":

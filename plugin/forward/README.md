@@ -2,8 +2,8 @@
 
 *forward* facilitates proxying DNS messages to upstream resolvers.
 
-The *forward* plugin is generally faster (~30+%) than *proxy* as it re-uses already openened sockets
-to the upstreams. It supports UDP, TCP and DNS-over-TLS and uses inband healthchecking that is
+The *forward* plugin is generally faster (~30+%) than *proxy* as it re-uses already opened sockets
+to the upstreams. It supports UDP, TCP and DNS-over-TLS and uses inband health checking that is
 enabled by default.
 When *all* upstreams are down it assumes healtchecking as a mechanism has failed and will try to
 connect to a random upstream (which may or may not work).
@@ -24,7 +24,7 @@ The health checks are done every *0.5s*. After *two* failed checks the upstream 
 unhealthy. The health checks use a recursive DNS query (`. IN NS`) to get upstream health. Any
 response that is not an error (REFUSED, NOTIMPL, SERVFAIL, etc) is taken as a healthy upstream. The
 health check uses the same protocol as specific in the **TO**. On startup each upstream is marked
-unhealthy until it passes a healthcheck. A 0 duration will disable any healthchecks.
+unhealthy until it passes a health check. A 0 duration will disable any health checks.
 
 Multiple upstreams are randomized (default policy) on first use. When a healthy proxy returns an
 error during the exchange the next upstream in the list is tried.
@@ -49,7 +49,7 @@ forward FROM TO... {
   Requests that match none of these names will be passed through.
 * `force_tcp`, use TCP even when the request comes in over UDP.
 * `health_checks`, use a different **DURATION** for health checking, the default duration is 0.5s.
-  A value of 0 disables the healthchecks completely.
+  A value of 0 disables the health checks completely.
 * `max_fails` is the number of subsequent failed health checks that are needed before considering
   a backend to be down. If 0, the backend will never be marked as down. Default is 2.
 * `expire` **DURATION**, expire connections after this time, the default is 10s.
@@ -61,7 +61,7 @@ forward FROM TO... {
 
 The upstream selection is done via random (default policy) selection. If the socket for this client
 isn't known *forward* will randomly choose one. If this turns out to be unhealthy, the next one is
-tried. If *all* hosts are down, we assume healthchecking is broken and select a *random* upstream to
+tried. If *all* hosts are down, we assume health checking is broken and select a *random* upstream to
 try.
 
 Also note the TLS config is "global" for the whole forwarding proxy if you need a different
@@ -74,7 +74,7 @@ If monitoring is enabled (via the *prometheus* directive) then the following met
 * `coredns_forward_request_duration_seconds{to}` - duration per upstream interaction.
 * `coredns_forward_request_count_total{to}` - query count per upstream.
 * `coredns_forward_response_rcode_total{to, rcode}` - count of RCODEs per upstream.
-* `coredns_forward_healthcheck_failure_count_total{to}` - number of failed healthchecks per upstream.
+* `coredns_forward_healthcheck_failure_count_total{to}` - number of failed health checks per upstream.
 * `coredns_forward_socket_count_total{to}` - number of cached sockets per upstream.
 
 Where `to` is one of the upstream servers (**TO** from the config), `proto` is the protocol used by
@@ -91,7 +91,7 @@ example.org {
 }
 ~~~
 
-Load-balance all requests between three resolvers, one of which has a IPv6 address.
+Load balance all requests between three resolvers, one of which has a IPv6 address.
 
 ~~~ corefile
 . {
@@ -140,6 +140,11 @@ seconds.
 }
 ~~~
 
+## Bugs
+
+The TLS config is global for the whole forwarding proxy if you need a different `tls-name` for
+different upstreams you're out of luck.
+
 ## Also See
 
-RFC 7858 for DNS over TLS.
+[RFC 7858](https://tools.ietf.org/html/rfc7858) for DNS over TLS.
