@@ -185,7 +185,7 @@ func parseBlock(c *caddy.Controller, f *Forward) error {
 			return err
 		}
 		if n < 0 {
-			return fmt.Errorf("max_fails can't be negative: %s", n)
+			return fmt.Errorf("max_fails can't be negative: %d", n)
 		}
 		f.maxfails = uint32(n)
 	case "health_check":
@@ -197,7 +197,7 @@ func parseBlock(c *caddy.Controller, f *Forward) error {
 			return err
 		}
 		if dur < 0 {
-			return fmt.Errorf("health_check can't be negative: %s", dur)
+			return fmt.Errorf("health_check can't be negative: %d", dur)
 		}
 		f.hcInterval = dur
 		for i := range f.proxies {
