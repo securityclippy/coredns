@@ -7,7 +7,6 @@ package forward
 import (
 	"crypto/tls"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/coredns/coredns/plugin"
@@ -78,7 +77,8 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 			// select an upstream to connect to.
 			r := new(random)
 			proxy = r.List(f.proxies)[0]
-			log.Printf("[WARNING] All upstreams down, picking random one to connect to %s", proxy.host.addr)
+
+			HealthcheckBrokenCount.Add(1)
 		}
 
 		if span != nil {
@@ -93,7 +93,6 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 		}
 
 		if err != nil {
-			log.Printf("[WARNING] Failed to connect to %s: %s", proxy.host.addr, err)
 			if fails < len(f.proxies) {
 				continue
 			}
